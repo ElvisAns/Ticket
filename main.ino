@@ -188,6 +188,7 @@ void process(byte adress, String MYDATA) {
   // LA CARTE EST VALIDE, PROCEDER A LA TRANSCRIPTION D'ARGENT
   if (MYDATA.toInt() == 0 & MYDATA.toInt()%100 != 0) {
     Serial.println("Invalid money balance entered");
+    Data='\0';
     return;
   }
   lcd.setCursor(0, 1);
