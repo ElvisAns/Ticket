@@ -49,7 +49,7 @@ Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS)
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 MFRC522::MIFARE_Key key;
 
-
+int _press = 0;
 
 void setup() {
   Serial.begin(9600); // Initialize serial communications with the PC //while (!Serial);    // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
@@ -111,10 +111,13 @@ void loop() {
         delay(500);
         read_rfid = false;
         delay(1000);
+        data_count = 0;
       }
       lcd.clear();
       clearData();
+      data_count = 0;
     }
+
   }
   else {//FULL CODE : START TO READ AND WRITE
     lcd.setCursor(0, 0);
@@ -125,24 +128,28 @@ void loop() {
     digitalWrite(ledLogin, LOW);
     //lcd.clear();
     customKey = customKeypad.getKey();
-    if (customKey) {
-      if (data_count >= 5) {
-        Serial.println(Data);
-        Serial.print("Start reading");
-        //lcd.clear();
-        readRFID(Data);
-        lcd.clear();
-        clearData();
-        //return;
-      }
-      else {
-        Data += String(customKey);
-        lcd.setCursor(data_count, 1);
-        lcd.print(Data[data_count]);
-        data_count++;
-        delay(200);
-      }
+    while (!customKey); //wait a press
+
+    if (_press == 5) {
+      _press = 0;
+      Serial.println(Data);
+      Serial.print("Start reading");
+      //lcd.clear();
+      data_count = 0;
+      readRFID(Data);
+      lcd.clear();
+      clearData();
+      //return;
     }
+    else {
+      _press++;
+      Data += customKey;
+      lcd.setCursor(_press, 1);
+      lcd.print(Data[_press]);
+      data_count++;
+      delay(200);
+    }
+
   }
 }
 void readRFID(String MYDATA) { //lecture des cartes
