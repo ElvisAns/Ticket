@@ -89,7 +89,7 @@ void loop() {
     }
     if (data_count == pass_length - 1) {
       lcd.clear();
-      if (Data.equals(MASTER)){ //str
+      if (Data.equals(MASTER)) { //str
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Acces Accordee");
@@ -138,7 +138,7 @@ void loop() {
       else {
         Data += String(customKey);
         lcd.setCursor(data_count, 1);
-        lcd.print((char)Data[data_count]);
+        lcd.print(Data[data_count]);
         data_count++;
         delay(200);
       }
@@ -146,16 +146,39 @@ void loop() {
   }
 }
 void readRFID(String MYDATA) { //lecture des cartes
+  lcd.clear();
+  lcd.setCursor(0, 1);
   int j = -1;
+  int cnt = 0;
   byte card_ID[4];
-  if ( ! mfrc522.PICC_IsNewCardPresent()) {
-    Data='\0';
-    return;//got to start of loop if there is no card present
+  while ( ! mfrc522.PICC_IsNewCardPresent()) {
+    lcd.print("Waiting a card...");
+    Serial.println("waiting new card in 10seconds...");
+    cnt++;
+    delay(100);
+    if (cnt >= 100) {
+      Data = '\0';
+      lcd.clear();
+      lcd.setCursor(0, 1);
+      lcd.print("No card found...");
+      Serial.println("No card where found...");
+      delay(2000);
+      lcd.clear();
+      return;
+    }
   }
-  if ( ! mfrc522.PICC_ReadCardSerial()) {
-   Data='\0';
-    return;
-  }
+
+  Serial.println("Card found...still reading");
+
+  while ( ! mfrc522.PICC_ReadCardSerial()) delay(100);
+
+  lcd.clear();
+  lcd.setCursor(0, 1);
+  lcd.print("A card was read");
+  Serial.println("Card found and have been readed");
+  delay(2000);
+  lcd.clear();
+
   for (byte i = 0; i < mfrc522.uid.size; i++) {
     card_ID[i] = mfrc522.uid.uidByte[i];
   }
@@ -186,16 +209,16 @@ void invalid() {
 
 void process(byte adress, String MYDATA) {
   // LA CARTE EST VALIDE, PROCEDER A LA TRANSCRIPTION D'ARGENT
-  if (MYDATA.toInt() == 0 & MYDATA.toInt()%100 != 0) {
+  if (MYDATA.toInt() == 0 & MYDATA.toInt() % 100 != 0) {
     Serial.println("Invalid money balance entered");
-    Data='\0';
+    Data = '\0';
     return;
   }
   lcd.setCursor(0, 1);
   lcd.print("Processing...");
   delay(200);
   unsigned long balance = readbalance(adress);
-  
+
   lcd.setCursor(0, 1);
   lcd.print("Bal:");
   lcd.setCursor(9, 1);
@@ -204,7 +227,7 @@ void process(byte adress, String MYDATA) {
   delay(1000);
   lcd.print("                                ");
   Serial.println("Old data : ");
-  Serial.println(String(balance*100) + " Fc");
+  Serial.println(String(balance * 100) + " Fc");
 
 
   //___________________________________
@@ -215,19 +238,19 @@ void process(byte adress, String MYDATA) {
   unsigned long newBal;
   unsigned long data2;
 
-  want=(MYDATA.toInt()/100);
+  want = (MYDATA.toInt() / 100);
 
-  newBal = want+balance;                             //preparation nouvelle balance
+  newBal = want + balance;                           //preparation nouvelle balance
   Serial.println("Data to add :");
-  Serial.println(" = " + String(want*100)+" Frc");
+  Serial.println(" = " + String(want * 100) + " Frc");
   Serial.println("New Balance to write  :");
-  Serial.println(String(newBal*100)+" Frc");
-  
-  writebalance(adress,newBal);                                  //ecrire nouvelle balance
+  Serial.println(String(newBal * 100) + " Frc");
+
+  writebalance(adress, newBal);                                 //ecrire nouvelle balance
   delay(100);
   readnewBalance(adress);
   digitalWrite(ledLogin, HIGH);
-  Data='\0';
+  Data = '\0';
   delay(1000);
   digitalWrite(ledLogin, LOW);
   clearData();
@@ -238,24 +261,24 @@ void process(byte adress, String MYDATA) {
 
 
 void clearData() {
-  Data='\0';
+  Data = '\0';
 }
-void writebalance(byte adress,int newbalance) {
- EEPROM.write(adress,newbalance);
- delay(100);
+void writebalance(byte adress, int newbalance) {
+  EEPROM.write(adress, newbalance);
+  delay(100);
 }
 
 void readnewBalance(byte adress) {
-  
+
   int balanceNow = EEPROM.read(adress);
 
   lcd.setCursor(0, 1);
   lcd.print("New Bal:");
   lcd.setCursor(9, 1);
- 
-  lcd.print(balanceNow*100 + "Frc");
+
+  lcd.print(balanceNow * 100 + "Frc");
   Serial.print("New Balance : ");
-  Serial.println(balanceNow*100 + "Frc");
+  Serial.println(balanceNow * 100 + "Frc");
   delay(1000);
 }
 
