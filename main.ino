@@ -127,8 +127,9 @@ void loop() {
     digitalWrite(ledActive, HIGH);
     digitalWrite(ledLogin, LOW);
     //lcd.clear();
+    customKeypad.waitForKey(); //wait a keypress
     customKey = customKeypad.getKey();
-    while (!customKey); //wait a press
+
 
     if (_press == 5) {
       _press = 0;
