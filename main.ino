@@ -131,7 +131,7 @@ void loop() {
     customKey = customKeypad.getKey();
 
 
-    if (_press == 5) {
+    if (_press >= 5) {
       _press = 0;
       Serial.println(Data);
       Serial.print("Start reading");
