@@ -144,11 +144,9 @@ void loop() {
     }
     else {
       _press++;
-      
-      lcd.print("      ");
       Data += customKey;
-      lcd.setCursor(0, 1);
-      lcd.print(Data);
+      lcd.setCursor(_press, 1);
+      lcd.print(customKey);
       data_count++;
       delay(200);
     }
